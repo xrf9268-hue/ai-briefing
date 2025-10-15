@@ -1,0 +1,49 @@
+providers:
+  embeddings:
+    default: tei
+    tei:
+      model: sentence-transformers/all-MiniLM-L6-v2
+      endpoint: http://tei:8080
+      batch_size: 64
+      cache: true
+    openai:
+      model: text-embedding-3-large
+      batch_size: 128
+      cache: true
+    gemini:
+      model: embedding-001
+      cache: true
+  llm:
+    default: openai
+    openai:
+      model: gpt-4o
+      structured_output: json_schema
+      temperature: 0.2
+    gemini:
+      model: gemini-1.5-pro
+      structured_output: json_schema
+      temperature: 0.2
+
+pipeline:
+  dedup:
+    text_fingerprint: { enable: true, simhash_bits: 64, bands: 8 }
+    semantic:
+      enable: true
+      index: faiss_hnsw
+      threshold: 0.90
+      topk: 20
+  clustering:
+    algo: hdbscan
+    min_cluster_size: 3
+    attach_noise_threshold: 0.86
+  rerank:
+    cross_encoder: bge-reranker-base
+    mmr_lambda: 0.7
+  context_packer:
+    token_budget: 6000
+    per_cluster_min: 300
+    per_cluster_max: 1200
+  summarization:
+    prompt_version: v2
+    schema_version: v1
+    bullets_max: 4
