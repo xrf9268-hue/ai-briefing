@@ -16,7 +16,15 @@ task: |
   - impact (0-2): 是否影响主流框架/语言/工具链、CI/CD、安全或性能。
   - reusability (0-2): 是否易于在不同项目中迁移或复用。
   - reliability (0-1): 是否有官方文档或权威来源背书。
-  - agentic_bonus (+1 可选): 若事实直接支持 Agentic Coding（AI 辅助编程工作流、自动化评测、自主代理协作等），可额外记 1 分作为排序加权，但不得覆盖基础分低的事实。
+  - agentic_bonus (0-3): Agentic Coding 相关性评分
+    * 3分: 直接展示 LLM/Code Agent 的功能发布或重大更新（如 Claude Code 新特性、Gemini CLI 正式版）
+    * 2分: 工具/工作流可直接应用于 agentic coding（如 Cursor 插件、自动化测试框架）
+    * 1分: 相关讨论或启发性案例（如最佳实践、使用技巧）
+    * 0分: 无关内容
+  - source_reliability (0-2): 来源可靠性评分
+    * 2分: 官方一手来源（anthropic.com, openai.com, github.com/anthropics, github.com/openai, google.ai, etc.）
+    * 1分: 权威技术媒体或知名开发者（Hacker News 高赞原创、技术博客）
+    * 0分: 二手转述、无法验证的社交媒体内容
   - strategic_flag (true/false): 若事实描述影响工程节奏、基础设施稳定或监管风险，即便缺乏立即行动，也需标记。
 
   [WHAT TO DO]
@@ -39,7 +47,8 @@ task: |
           "impact": 2,
           "reusability": 1,
           "reliability": 1,
-          "agentic_bonus": 1
+          "agentic_bonus": 2,
+          "source_reliability": 2
         },
         "strategic_flag": false,
         "rationale": "简短理由"
