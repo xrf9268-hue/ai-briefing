@@ -34,12 +34,25 @@ processing:
     budget: 6000
     per_cluster_min: 300
     per_cluster_max: 1200
-  multi_stage: false
+  keyword_filter:
+    enabled: true
+    min_score: 0.5
+    top_k: 500
+    boost_official_sources: true
+  scoring_weights:
+    actionability: 3.0
+    novelty: 2.0
+    impact: 2.0
+    reusability: 2.0
+    reliability: 1.0
+    agentic_bonus: 2.5
+    source_reliability: 2.0
+  multi_stage: true
   agentic_section: true
   brief_lite: false
   max_bullets_per_topic: 4
 summarization:
-  prompt_file: prompts/daily_briefing_multisource.yaml
+  prompt_file: prompts/stage1_extract_facts.yaml
   temperature: 0.2
   timeout: 600
   retries: 1

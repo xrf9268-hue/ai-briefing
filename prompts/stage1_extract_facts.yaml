@@ -7,6 +7,20 @@ system: |
   - 证据：仅使用输入中出现的链接，保持原始含义。
   - 输出：仅返回 JSON，遵循指定结构；禁止输出其他文字。
 
+  【优先级主题】(Priority Topics)
+  特别关注以下主题的事实提取，优先保留细节：
+  1. Large Language Model (LLM) 官方发布：Claude、GPT、Gemini、Llama 等模型的版本更新、功能发布
+  2. Agentic Coding 工具：Claude Code、Cursor、Devin、Gemini CLI、GitHub Copilot、代理式编程工具
+  3. Vibe Coding 相关：AI 辅助的快速原型开发、对话式编程、实时协作编码
+  4. Code Agent CLI：命令行工具、终端增强、自动化脚本生成
+
+  【来源优先级】(Source Priority)
+  - 一级来源 (Tier 1): 官方博客、GitHub Release、API 文档 (anthropic.com, openai.com, google.ai, github.com/anthropics, etc.)
+  - 二级来源 (Tier 2): 权威技术媒体、高赞 HN 讨论、知名开发者博客
+  - 三级来源 (Tier 3): 社交媒体转述、无法验证的评论
+
+  提取事实时，明确标注来源级别（如果 URL 明显属于一级/二级来源）。
+
 task: |
   [CLUSTER CONTEXT]
   {{ cluster_json }}

@@ -17,6 +17,8 @@ from briefing.utils import now_utc, get_logger, parse_datetime_safe
 from briefing.stages.dedup import dedup_fingerprint, dedup_semantic
 from briefing.stages.clustering import cluster as stage_cluster
 from briefing.stages.rerank import rerank_candidates
+from briefing.stages.keyword_filter import filter_by_keywords
+from briefing.stages.source_scoring import enrich_with_source_scores
 
 TEI_ORIGIN = os.getenv("TEI_ORIGIN", "http://tei:3000")
 LID_MODEL_PATH = os.getenv("LID_MODEL_PATH", "/workspace/lid.176.bin")
@@ -404,6 +406,31 @@ def run_processing_pipeline(raw_items: List[Dict[str, Any]], cfg: Dict[str, Any]
 
     if not filtered:
         logger.info("pipeline: no items after time_window filter")
+        return []
+
+    # NEW: Keyword filtering (if enabled)
+    kw_cfg = cfg.get("keyword_filter", {})
+    if kw_cfg.get("enabled", False):
+        filtered_before_kw = len(filtered)
+        filtered = filter_by_keywords(
+            filtered,
+            min_score=float(kw_cfg.get("min_score", 0.0)),
+            top_k=kw_cfg.get("top_k"),
+            boost_official_sources=kw_cfg.get("boost_official_sources", True),
+        )
+        logger.info(
+            "Keyword filter: %d -> %d items (min_score=%.2f, top_k=%s)",
+            filtered_before_kw,
+            len(filtered),
+            kw_cfg.get("min_score", 0.0),
+            kw_cfg.get("top_k", "None"),
+        )
+
+    # NEW: Source reliability scoring (always run - adds metadata for later use)
+    filtered = enrich_with_source_scores(filtered)
+
+    if not filtered:
+        logger.info("pipeline: no items after keyword/source filtering")
         return []
 
     # Optional: fingerprint dedup prior to embedding (controlled by processing.dedup.fingerprint)

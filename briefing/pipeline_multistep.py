@@ -65,7 +65,8 @@ DEFAULT_SCORING_WEIGHTS: Dict[str, float] = {
     "impact": 2.0,
     "reusability": 2.0,
     "reliability": 1.0,
-    "agentic_bonus": 1.0,
+    "agentic_bonus": 2.5,  # Increased from 1.0 to prioritize agentic coding content
+    "source_reliability": 2.0,  # New dimension for source quality
 }
 
 
@@ -225,7 +226,8 @@ STAGE2_SCHEMA: Dict[str, Any] = {
                             "impact": {"type": "integer", "minimum": 0, "maximum": 2},
                             "reusability": {"type": "integer", "minimum": 0, "maximum": 2},
                             "reliability": {"type": "integer", "minimum": 0, "maximum": 1},
-                            "agentic_bonus": {"type": "integer", "minimum": 0, "maximum": 1, "default": 0},
+                            "agentic_bonus": {"type": "integer", "minimum": 0, "maximum": 3, "default": 0},
+                            "source_reliability": {"type": "integer", "minimum": 0, "maximum": 2, "default": 0},
                         },
                         "required": [
                             "actionability",
@@ -233,6 +235,8 @@ STAGE2_SCHEMA: Dict[str, Any] = {
                             "impact",
                             "reusability",
                             "reliability",
+                            "agentic_bonus",
+                            "source_reliability",
                         ],
                     },
                     "strategic_flag": {"type": "boolean", "default": False},

@@ -237,7 +237,32 @@
             "impact": {"type": "number"},
             "reusability": {"type": "number"},
             "reliability": {"type": "number"},
-            "agentic_bonus": {"type": "number"}
+            "agentic_bonus": {"type": "number"},
+            "source_reliability": {"type": "number"}
+          }
+        },
+        "keyword_filter": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "min_score": {
+              "type": "number",
+              "minimum": 0,
+              "default": 0.5
+            },
+            "top_k": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 500
+            },
+            "boost_official_sources": {
+              "type": "boolean",
+              "default": true
+            }
           }
         }
       }
