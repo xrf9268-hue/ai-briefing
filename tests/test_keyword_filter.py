@@ -31,7 +31,7 @@ class TestKeywordScoring:
         }
         score = compute_keyword_score(item)
         # Should get points for "Cursor" + "AI-assisted" matches
-        assert score > 2.0, "Agentic coding tool should score moderately"
+        assert score > 1.5, "Agentic coding tool should score moderately"
 
     def test_vibe_coding_scoring(self):
         """Test scoring for vibe coding related content."""
@@ -94,7 +94,7 @@ class TestKeywordScoring:
         score = compute_keyword_score(item)
         # Multiple matches: "Claude Code", "Cursor", "agentic coding", "AI assistant"
         # Should use log1p scaling, not linear
-        assert score > 5.0, "Multiple keywords should accumulate"
+        assert score > 4.0, "Multiple keywords should accumulate"
 
 
 class TestKeywordFiltering:

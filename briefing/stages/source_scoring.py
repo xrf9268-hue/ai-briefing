@@ -31,7 +31,6 @@ TIER2_PATTERNS = [
     r"github\.com/[\w-]+/[\w-]+/releases",  # GitHub releases
     r"news\.ycombinator\.com/item",  # HN (will check score separately)
     r"(techcrunch|arstechnica|theverge|wired)\.com",
-    r"blog\.(.*)\.(com|io|org)",  # Technical blogs (general pattern)
 ]
 
 
