@@ -14,6 +14,7 @@ AI 每日简报通过 ML 驱动的处理管道，从公开来源（如 Hacker Ne
 
 - **多源聚合**：支持 Hacker News / Twitter / Reddit 等公开渠道
 - **智能处理**：嵌入 → 去重 → 话题聚类（HDBSCAN）→ 重排序（BGE-Reranker）→ 摘要生成
+- **🆕 提示优化**：关键词过滤 + TF-IDF 加权查询 + 可配置模式，精准聚焦 LLM 发布和 Agentic Coding 话题
 - **原文可追溯**：保留原始链接，便于快速核验与延伸阅读
 - **多渠道分发**：网站阅读、RSS 订阅、Telegram 推送；历史内容自动归档（GitHub / 月度）
 - **良好体验**：站内搜索、PWA、全球边缘加速部署
@@ -148,6 +149,80 @@ summarization:
 output:
   formats: ["md", "json", "html"]
 ```
+
+## 🎯 提示优化功能 (Prompt Optimization)
+
+> **最新功能 (2025-11-22)**: 增强的内容过滤、TF-IDF 加权查询和可配置关键词模式
+
+### 关键词过滤 (Keyword Filtering)
+
+智能过滤内容，优先聚焦 LLM 发布、Agentic Coding 工具等相关主题：
+
+```yaml
+processing:
+  keyword_filter:
+    enabled: true
+    min_score: 0.5           # 最低相关性分数
+    top_k: 500               # 保留 top 500 条目
+    boost_official_sources: true  # 官方来源 1.5x 加权
+```
+
+**内置关键词类别**:
+- **llm_releases** (权重 3.0): Claude、GPT、Gemini、Llama 模型发布
+- **agentic_coding** (权重 2.5): Claude Code、Cursor、Devin、Copilot
+- **vibe_coding** (权重 2.0): 快速原型、对话式编程
+- **cli_tools** (权重 2.0): 命令行工具、终端自动化
+
+### TF-IDF 加权查询
+
+使用 TF-IDF 为重排序生成加权查询，提升精准度：
+
+```yaml
+processing:
+  rerank:
+    strategy: ce+mmr
+    use_tfidf_query: true   # 启用 TF-IDF 查询
+    tfidf_top_n: 10         # 提取前 10 个关键词
+```
+
+### 自定义关键词模式
+
+通过 YAML 配置自定义关键词，无需修改代码：
+
+```yaml
+processing:
+  keyword_filter:
+    enabled: true
+    keyword_categories:
+      custom_category:
+        weight: 2.0
+        keywords:
+          - "\\bYourKeyword\\b"
+          - "\\bAnotherPattern\\b"
+    official_domains:
+      - "your-domain.com"
+```
+
+### A/B 测试工具
+
+使用内置工具评估优化效果：
+
+```bash
+python tools/compare_ab.py \
+  --baseline-config configs/ai-briefing-hackernews-baseline.yaml \
+  --optimized-config configs/ai-briefing-hackernews-optimized.yaml \
+  --output reports/comparison.json
+```
+
+**追踪指标**:
+- Agentic 内容占比 (目标: ≥40%)
+- 官方来源占比 (目标: ≥60%)
+- 处理时间 (目标: <150s)
+
+📚 **详细文档**:
+- [配置示例](docs/CONFIGURATION_EXAMPLES.md)
+- [验证报告](docs/VALIDATION_REPORT.md)
+- [实现总结](docs/IMPLEMENTATION_SUMMARY.md)
 
 ## 🏗️ 架构设计
 

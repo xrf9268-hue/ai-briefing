@@ -28,6 +28,8 @@ processing:
   rerank:
     strategy: ce+mmr
     lambda: 0.4
+    use_tfidf_query: true
+    tfidf_top_n: 10
   packer:
     enabled: true
     budget: 6000
