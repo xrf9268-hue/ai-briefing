@@ -155,7 +155,9 @@
           "properties": {
             "strategy": { "type": "string", "enum": ["none", "ce", "mmr", "ce+mmr"], "default": "ce" },
             "lambda": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.4 },
-            "model": { "type": "string" }
+            "model": { "type": "string" },
+            "use_tfidf_query": { "type": "boolean", "default": false },
+            "tfidf_top_n": { "type": "integer", "minimum": 1, "maximum": 50, "default": 10 }
           }
         },
         "packer": {
@@ -262,6 +264,26 @@
             "boost_official_sources": {
               "type": "boolean",
               "default": true
+            },
+            "keyword_categories": {
+              "type": "object",
+              "description": "Custom keyword categories for filtering. Each category should have 'weight' and 'keywords' fields.",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "weight": { "type": "number", "minimum": 0 },
+                  "keywords": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                },
+                "required": ["weight", "keywords"]
+              }
+            },
+            "official_domains": {
+              "type": "array",
+              "description": "Custom list of official source domains for boosting",
+              "items": { "type": "string" }
             }
           }
         }

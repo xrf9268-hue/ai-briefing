@@ -83,11 +83,19 @@ OFFICIAL_SOURCE_DOMAINS = [
 ]
 
 
-def compute_keyword_score(item: Dict[str, Any]) -> float:
+def compute_keyword_score(
+    item: Dict[str, Any],
+    keyword_categories: Optional[Dict[str, Dict[str, Any]]] = None,
+    official_domains: Optional[List[str]] = None,
+    boost_official_sources: bool = True,
+) -> float:
     """Compute keyword relevance score using TF-IDF inspired approach.
 
     Args:
         item: Content item with 'text', 'title', and 'url' fields
+        keyword_categories: Custom keyword categories (defaults to KEYWORD_CATEGORIES)
+        official_domains: Custom official source domains (defaults to OFFICIAL_SOURCE_DOMAINS)
+        boost_official_sources: Apply 1.5x multiplier to official sources (default: True)
 
     Returns:
         Keyword relevance score (0.0+). Higher scores indicate better topic match.
@@ -97,6 +105,9 @@ def compute_keyword_score(item: Dict[str, Any]) -> float:
         - 2.0-5.0: Moderate relevance (multiple keywords)
         - 5.0+: High relevance (many keywords + official source boost)
     """
+    categories = keyword_categories or KEYWORD_CATEGORIES
+    domains = official_domains or OFFICIAL_SOURCE_DOMAINS
+
     text = f"{item.get('text', '')} {item.get('title', '')}".lower()
     url = item.get("url", "").lower()
 
@@ -104,7 +115,7 @@ def compute_keyword_score(item: Dict[str, Any]) -> float:
     score = 0.0
     matches_by_category = {}
 
-    for category, config in KEYWORD_CATEGORIES.items():
+    for category, config in categories.items():
         weight = config["weight"]
         matches = 0
         for pattern in config["keywords"]:
@@ -116,10 +127,11 @@ def compute_keyword_score(item: Dict[str, Any]) -> float:
             score += weight * math.log1p(matches)
 
     # Boost for official sources (1.5x multiplier)
-    for domain in OFFICIAL_SOURCE_DOMAINS:
-        if domain in url:
-            score *= 1.5
-            break
+    if boost_official_sources:
+        for domain in domains:
+            if domain in url:
+                score *= 1.5
+                break
 
     return score
 
@@ -130,6 +142,8 @@ def filter_by_keywords(
     min_score: float = 0.0,
     top_k: Optional[int] = None,
     boost_official_sources: bool = True,
+    keyword_categories: Optional[Dict[str, Dict[str, Any]]] = None,
+    official_domains: Optional[List[str]] = None,
 ) -> List[Dict[str, Any]]:
     """Filter items by keyword relevance.
 
@@ -138,6 +152,8 @@ def filter_by_keywords(
         min_score: Minimum keyword score threshold (default: 0.0, no filtering)
         top_k: Keep only top K items by score (default: None, keep all above threshold)
         boost_official_sources: Apply 1.5x multiplier to official sources (default: True)
+        keyword_categories: Custom keyword categories (defaults to KEYWORD_CATEGORIES)
+        official_domains: Custom official source domains (defaults to OFFICIAL_SOURCE_DOMAINS)
 
     Returns:
         Filtered list of items, sorted by keyword score descending.
@@ -145,7 +161,12 @@ def filter_by_keywords(
     """
     scored_items = []
     for item in items:
-        score = compute_keyword_score(item)
+        score = compute_keyword_score(
+            item,
+            keyword_categories=keyword_categories,
+            official_domains=official_domains,
+            boost_official_sources=boost_official_sources,
+        )
         if score >= min_score:
             item_copy = dict(item)
             item_copy["keyword_score"] = score

@@ -19,6 +19,7 @@ from briefing.stages.clustering import cluster as stage_cluster
 from briefing.stages.rerank import rerank_candidates
 from briefing.stages.keyword_filter import filter_by_keywords
 from briefing.stages.source_scoring import enrich_with_source_scores
+from briefing.stages.query_builder import build_weighted_query
 
 TEI_ORIGIN = os.getenv("TEI_ORIGIN", "http://tei:3000")
 LID_MODEL_PATH = os.getenv("LID_MODEL_PATH", "/workspace/lid.176.bin")
@@ -417,6 +418,8 @@ def run_processing_pipeline(raw_items: List[Dict[str, Any]], cfg: Dict[str, Any]
             min_score=float(kw_cfg.get("min_score", 0.0)),
             top_k=kw_cfg.get("top_k"),
             boost_official_sources=kw_cfg.get("boost_official_sources", True),
+            keyword_categories=kw_cfg.get("keyword_categories"),
+            official_domains=kw_cfg.get("official_domains"),
         )
         logger.info(
             "Keyword filter: %d -> %d items (min_score=%.2f, top_k=%s)",
@@ -520,7 +523,21 @@ def run_processing_pipeline(raw_items: List[Dict[str, Any]], cfg: Dict[str, Any]
         pick = _top_k_by_centroid(embs2, idxs, k=min(initial_topk, len(idxs)))
         pick = pick[:max_candidates]
         best_idx, best_vec = _cluster_centrality(embs2, idxs)
-        query_text = filtered2[best_idx]["text"]
+
+        # Build query text - use TF-IDF weighted query if enabled
+        use_tfidf_query = rerank_cfg.get("use_tfidf_query", False)
+        if use_tfidf_query:
+            cluster_items = [filtered2[i] for i in pick]
+            top_n_keywords = int(rerank_cfg.get("tfidf_top_n", 10))
+            try:
+                query_text = build_weighted_query(cluster_items, top_n=top_n_keywords)
+                logger.debug("Using TF-IDF weighted query for cluster %s", lb)
+            except Exception as e:
+                logger.warning("TF-IDF query builder failed for cluster %s, falling back to centroid text: %s", lb, e)
+                query_text = filtered2[best_idx]["text"]
+        else:
+            query_text = filtered2[best_idx]["text"]
+
         cand_texts = [filtered2[i]["text"] for i in pick]
         if strategy in ("none", "ce", "mmr", "ce+mmr"):
             try:
